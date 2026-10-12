@@ -1,0 +1,12 @@
+#ignore all
+*
+
+#permiss directories
+!*/
+
+#we accept jsut .c and .h
+!*.c
+!*.h
+!Makefile
+!README.md
+!.gitignore
