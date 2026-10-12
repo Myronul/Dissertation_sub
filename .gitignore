@@ -10,3 +10,6 @@
 !Makefile
 !README.md
 !.gitignore
+!*.yml
+
+obj_*/
