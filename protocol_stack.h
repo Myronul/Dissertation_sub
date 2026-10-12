@@ -40,8 +40,8 @@ typedef struct DATA
 
 
 extern NODE node;
-DATA dataTxBroadCast;
-DATA dataTxUniCast;
+extern DATA dataTxBroadCast;
+extern DATA dataTxUniCast;
 
 
 void init_com_channels(void);

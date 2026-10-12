@@ -1,6 +1,7 @@
 #include "sys.h"
 
 nodeType hostNodeType;
+struct ctimer timer01; /*100 ms timer isr*/
 extern struct process process_heartbeat;
 extern uint8_t timerHeartBeatRNG_counter;
 extern uint8_t flagStartHeartBeatTimer;

@@ -4,7 +4,8 @@
 
 extern nodeType hostNodeType;
 ROUTING_TABLE routingTable = {0}; /*store current ids network in listening mode*/
-
+DATA dataTxBroadCast;
+DATA dataTxUniCast;
 
 void message_send_broadcast(const char* payload, uint8_t payloadLen, uint8_t msgType)
 {

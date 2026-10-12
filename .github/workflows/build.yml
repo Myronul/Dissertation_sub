@@ -8,15 +8,12 @@ on:
 
 env:
   CONTIKI_REPO: contiki-os/contiki
-  CONTIKI_REF: 32b5b17f674232867c22916bb2e2534c8e9a92ff  
+  CONTIKI_REF: 32b5b17f674232867c22916bb2e2534c8e9a92ff
+  TARGET: sky
 
 jobs:
   build:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [native, sky]        
 
     steps:
       - name: Checkout Contiki
@@ -34,28 +31,24 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          case "${{ matrix.target }}" in
-            native)       sudo apt-get install -y build-essential ;;
-            sky|exp5438)  sudo apt-get install -y build-essential gcc-msp430 binutils-msp430 msp430-libc ;;
-            micaz)        sudo apt-get install -y build-essential gcc-avr binutils-avr avr-libc ;;
-          esac
+          sudo apt-get install -y build-essential gcc-msp430 binutils-msp430 msp430-libc
 
       - name: Build
         working-directory: contiki/examples/research_protocol
-        run: make TARGET=${{ matrix.target }}
+        run: make TARGET=${{ env.TARGET }}
 
       - name: Collect ELF
         working-directory: contiki/examples/research_protocol
         run: |
           mkdir -p "$GITHUB_WORKSPACE/out"
-          cp research_protocol.${{ matrix.target }} \
-             "$GITHUB_WORKSPACE/out/research_protocol-${{ matrix.target }}.elf"
+          cp research_protocol.${{ env.TARGET }} "$GITHUB_WORKSPACE/out/research_protocol-${{ env.TARGET }}.elf"
           cp *.map "$GITHUB_WORKSPACE/out/" 2>/dev/null || true
           file "$GITHUB_WORKSPACE"/out/*.elf
+          msp430-size "$GITHUB_WORKSPACE"/out/*.elf
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: research_protocol-${{ matrix.target }}
+          name: research_protocol-${{ env.TARGET }}
           path: out/
           if-no-files-found: error

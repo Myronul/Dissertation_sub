@@ -9,7 +9,7 @@
 #define state_IDLE                 0x02 
 #define state_START_HEART_BEAT     0x03 
 
-struct ctimer timer01; /*100 ms timer isr*/
+extern struct ctimer timer01; /*100 ms timer isr*/
 
 void sys_init_random_node_values(void);
 void sys_heart_beat_handler_tx_start(void);
