@@ -22,7 +22,8 @@ typedef struct NODE
 {
     uint8_t id; /*unique id for each node*/
     uint8_t metric;
-    uint16_t timerHeartBeat; /*timer for the heart beat*/
+    uint8_t timerHeartBeat; /*timer for the heart beat *100ms*/
+    uint8_t timerTick; /*counter to compare value with timerHeartBeat value within cb*/
 
 }NODE;
 

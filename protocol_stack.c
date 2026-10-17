@@ -12,8 +12,12 @@
 
 extern uint8_t SystemState;
 extern ROUTING_TABLE routingTable;
+extern struct process process_heartbeat_reset;
 
 NODE node; /*defined as extern in the header*/
+DATA dataTxBroadCast;
+DATA dataTxUniCast;
+
 DATA dataRxBroadCast;
 DATA dataRxUniCast;
 
@@ -100,6 +104,18 @@ static void push_data_com_stack(DATA dataRx, DATA* buffer, uint8_t* map, uint8_t
             printf("[FILTER]Message filtered in state LISTEN\n");
             return; /*for this state we will accept only a certain types of msges to not fill fast the buffer*/
         }
+        break;
+
+        case state_START_HEART_BEAT:
+        if(dataRx.msgType == msgType_HB_HEARTBEAT)
+        {
+            /*send directly to process*/
+            printf("Received heartbeat msgType_HB_HEARTBEAT, sent to clear the tick\n");
+            process_post(&process_heartbeat_reset, PROCESS_EVENT_CONTINUE, &dataRx);
+            return;
+        }
+
+        /*TO DO: for else branch see other possible message types*/
         break;
 
         case state_IDLE:

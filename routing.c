@@ -72,3 +72,41 @@ inline void heapify_routing_table_consumers(void)
     }
 
 }
+
+void delete_node_from_table(nodeType flag, uint8_t index)
+{
+    uint8_t i = 0;
+
+    switch(flag)
+    {
+        case PROCESSER:
+        for(i=index; i<routingTable.indexProcessers-1; i++)
+        {
+            routingTable.routingTableProcessers[i] = routingTable.routingTableProcessers[i+1];
+        }
+        routingTable.indexProcessers--;
+        heapify_routing_table_processers();
+        break;
+
+        case PRODUCER:
+        for(i=index; i<routingTable.indexProducers-1; i++)
+        {
+            routingTable.routingTableProducers[i] = routingTable.routingTableProducers[i+1];
+        }
+        routingTable.indexProducers--;
+        heapify_routing_table_producers();
+        break;
+
+        case CONSUMER:
+        for(i=index; i<routingTable.indexConsumers-1; i++)
+        {
+            routingTable.routingTableConsumers[i] = routingTable.routingTableConsumers[i+1];
+        }
+        routingTable.indexConsumers--;
+        heapify_routing_table_consumers();
+        break;
+        
+        default:
+        break;
+    }
+}

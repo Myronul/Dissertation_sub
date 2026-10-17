@@ -19,5 +19,6 @@ void heapify_routing_table_all(void);
 void heapify_routing_table_processers(void);
 void heapify_routing_table_producers(void);
 void heapify_routing_table_consumers(void);
+void delete_node_from_table(nodeType flag, uint8_t index);
 
 #endif 

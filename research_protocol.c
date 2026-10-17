@@ -27,7 +27,8 @@ static void Log_print_state()
 
 PROCESS(process_init_node, "Protocol Init Node");
 PROCESS(process_heartbeat, "Protocol Process HeartBeat");
-AUTOSTART_PROCESSES(&process_init_node, &process_heartbeat);
+PROCESS(process_heartbeat_reset, "Protocol HeartBeat reset tick node");
+AUTOSTART_PROCESSES(&process_init_node, &process_heartbeat, &process_heartbeat_reset);
 
 
 PROCESS_THREAD(process_init_node, ev, data)
@@ -139,9 +140,31 @@ PROCESS_THREAD(process_heartbeat, ev, data)
         if(SystemState >= state_START_HEART_BEAT)
         {
             handle_heart_beat_send();
+            check_heart_beat_tick_routing_table();
         }        
     }
 
     PROCESS_END();
 }
 
+/*pentru heartbeat reset*/
+
+PROCESS_THREAD(process_heartbeat_reset, ev, data)
+{
+    PROCESS_BEGIN();
+
+    while(1)
+    {
+        PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_CONTINUE);
+
+        if(SystemState >= state_START_HEART_BEAT)
+        {
+            printf("[THREAD] Calling thread process_heartbeat_reset\n");
+            DATA copyData = *(DATA*)data; /*do not maintain copy to volatile variable!*/
+            reset_heart_beat_tick_routing_table_node(copyData);
+        }
+
+    }
+
+    PROCESS_END();
+}
