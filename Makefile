@@ -27,3 +27,4 @@ CONTIKI_WITH_IPV6 = 0
 
 CONTIKI = ../..
 include $(CONTIKI)/Makefile.include
+CFLAGS += -g -O0

@@ -33,8 +33,10 @@ void handle_heart_beat_send(void)
     if(flagStartHeartBeatTimer)
     {
         /* timer arrived, send heartbeat */
-        message_send_broadcast(payload_msgType_HB_HEARTBEAT, 
-                              sizeof(payload_msgType_HB_HEARTBEAT), 
+        char myPayload[1] = {payload_msgType_HB_HEARTBEAT};
+        
+        message_send_broadcast(myPayload, 
+                              sizeof(myPayload), 
                               msgType_HB_HEARTBEAT);
 
         printf("HEARTBEAT SENT...test...passed %u ms :)\n", node.timerHeartBeat);

@@ -19,8 +19,10 @@ void message_send_broadcast(const char* payload, uint8_t payloadLen, uint8_t msg
 
 void message_discovery_searching()
 {
-    message_send_broadcast(payload_msgType_BC_AUTODISCOVERY_START, 
-                           sizeof(payload_msgType_BC_AUTODISCOVERY_START), 
+    char myPayload[1] = {payload_msgType_BC_AUTODISCOVERY_START};
+
+    message_send_broadcast(myPayload, 
+                           sizeof(myPayload), 
                            msgType_BC_AUTODISCOVERY_START);
 }
 
