@@ -18,7 +18,7 @@ void sys_init_random_node_values(void)
 {
     sys_init_random_node_type();
     node.metric = random_rand()%100; /*randomly assign a metric value*/
-    node.timerHeartBeat = 10 + (1 * (random_rand() % 10)); /* *100ms */
+    node.timerHeartBeat = 500 + (100 * (random_rand() % 10)); /* *100ms */
     node.timerTick = 0;
     printf("[INFO]Node %u assigned metric: %u, heartbeat timer: %u ms\n", node.id, node.metric, node.timerHeartBeat);
 }
@@ -32,6 +32,7 @@ static void sys_timer01_cb_(void* ptr)
 
         if(node.timerTick >= node.timerHeartBeat)
         {
+            /*send heartbeat in the network*/
             process_post(&process_heartbeat, PROCESS_EVENT_CONTINUE, NULL);
             node.timerTick = 0;
         }

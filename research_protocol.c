@@ -5,6 +5,7 @@
 #include "lib/random.h"
 #include "sys.h"
 #include "heart_beat.h"
+#include "util.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -57,6 +58,7 @@ PROCESS_THREAD(process_init_node, ev, data)
             {
                 /*invite from an existing network have been sent*/
                 /*TO DO*/
+                
 
             }
 
@@ -140,7 +142,17 @@ PROCESS_THREAD(process_heartbeat, ev, data)
         if(SystemState >= state_START_HEART_BEAT)
         {
             handle_heart_beat_send();
+            /* at each heart beat send we check if there are any nodes that have not responded */
             check_heart_beat_tick_routing_table();
+            
+            if(check_heart_beat_tick_all_routing_table())
+            {
+                /*the node works but has lost connectivity*/
+                printf("[HEARTBEAT] Node has lost connectivity!\n");
+                clear_all_stack_buffers();
+                SystemState = state_AUTODISCOVERY;
+                continue;
+            }
         }        
     }
 
@@ -160,7 +172,7 @@ PROCESS_THREAD(process_heartbeat_reset, ev, data)
         if(SystemState >= state_START_HEART_BEAT)
         {
             printf("[THREAD] Calling thread process_heartbeat_reset\n");
-            DATA copyData = *(DATA*)data; /*do not maintain copy to volatile variable!*/
+            DATA copyData = *(DATA*)data; /*do not maintain reference to volatile variable!*/
             reset_heart_beat_tick_routing_table_node(copyData);
         }
 

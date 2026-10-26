@@ -296,7 +296,13 @@ void send_message_broadcast(DATA *data)
     printf("[TX] Sent packet Broadcast\n");
 }
 
-
+void clear_all_stack_buffers()
+{
+    memset(dataQeueBc, 0, sizeof(dataQeueBc));
+    memset(dataQeueUc, 0, sizeof(dataQeueUc));
+    protocol_reset_stack_BC();
+    protocol_reset_stack_UC();
+}
 
 
 linkaddr_t protocol_get_min_target_metric(nodeType targetType) 

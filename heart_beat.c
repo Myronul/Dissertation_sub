@@ -79,7 +79,7 @@ void check_heart_beat_tick_routing_table(void)
 
     for(i=routingTable.indexConsumers-1; i>=0; i--)
     {
-        if(routingTable.routingTableConsumers[i].timerTick >= 2*routingTable.routingTableConsumers[i].timerHeartBeat)
+        if(routingTable.routingTableConsumers[i].timerTick >= 4*routingTable.routingTableConsumers[i].timerHeartBeat)
         {
             /*EXPIRED TIMER! delete it from the list*/
             printf("Deleted node from routing table consumer:%i\n", routingTable.routingTableConsumers[i].id);
@@ -90,7 +90,7 @@ void check_heart_beat_tick_routing_table(void)
 
     for(i=routingTable.indexProducers-1; i>=0; i--)
     {
-        if(routingTable.routingTableProducers[i].timerTick >= 2*routingTable.routingTableProducers[i].timerHeartBeat)
+        if(routingTable.routingTableProducers[i].timerTick >= 4*routingTable.routingTableProducers[i].timerHeartBeat)
         {
             printf("Deleted node from routing table producer:%i\n", routingTable.routingTableProducers[i].id);
             delete_node_from_table(PRODUCER, i);
@@ -100,7 +100,7 @@ void check_heart_beat_tick_routing_table(void)
 
     for(i=routingTable.indexProcessers-1; i>=0; i--)
     {
-        if(routingTable.routingTableProcessers[i].timerTick >= 2*routingTable.routingTableProcessers[i].timerHeartBeat)
+        if(routingTable.routingTableProcessers[i].timerTick >= 4*routingTable.routingTableProcessers[i].timerHeartBeat)
         {
             printf("Deleted node from routing table processer:%i\n", routingTable.routingTableProcessers[i].id);
             delete_node_from_table(PROCESSER, i);
@@ -108,7 +108,22 @@ void check_heart_beat_tick_routing_table(void)
         }
     }
 
+}
 
+inline bool check_heart_beat_tick_all_routing_table(void)
+{
+    /*function that will handle all the current registered node heartbeat in the
+    routing table*/
+
+    if(routingTable.indexConsumers == 0 && 
+       routingTable.indexProducers == 0 && 
+       routingTable.indexProcessers == 0)
+    {
+        printf("[INFO]All routing tables are empty! Dead NODE!\n");
+        return true;
+    }
+
+    return false;
 }
 
 void reset_heart_beat_tick_routing_table_node(DATA nodeData)
