@@ -2,6 +2,7 @@
 #include"protocol_messages.h"
 #include"routing.h"
 #include "sys.h"
+#include "util.h"
 
 #define UNICAST_CHANNEL 129 /*unic radio channel active*/
 #define BROADCAST_CHANNEL 146 
@@ -13,6 +14,7 @@
 extern uint8_t SystemState;
 extern ROUTING_TABLE routingTable;
 extern struct process process_heartbeat_reset;
+extern struct process process_search_stack_buffer; /*find nodes that are in broadcast searching*/
 
 NODE node; /*defined as extern in the header*/
 DATA dataTxBroadCast;
@@ -33,6 +35,7 @@ static uint8_t flagBroadCastRx = 0;
 static struct unicast_conn uc;    /*rime structure that handle the radio unicast com*/
 static struct broadcast_conn bc;  /*rime structure that handle the radio broadcast com*/
 
+DATA safeCopy = {0}; /*safe copy of the data received in the ISR*/
 
 static uint8_t filter_routing_table(DATA dataRx)
 {
@@ -83,7 +86,6 @@ static uint8_t filter_routing_table(DATA dataRx)
 
 }
 
-
 static void push_data_com_stack(DATA dataRx, DATA* buffer, uint8_t* map, uint8_t flagMap)
 {
     
@@ -111,7 +113,8 @@ static void push_data_com_stack(DATA dataRx, DATA* buffer, uint8_t* map, uint8_t
         {
             /*send directly to process*/
             printf("Received heartbeat msgType_HB_HEARTBEAT, sent to clear the tick\n");
-            process_post(&process_heartbeat_reset, PROCESS_EVENT_CONTINUE, &dataRx);
+            safeCopy = dataRx; /*make a safe copy of the data received in the ISR*/
+            process_post(&process_heartbeat_reset, PROCESS_EVENT_CONTINUE, &safeCopy);
             return;
         }
 
@@ -125,6 +128,15 @@ static void push_data_com_stack(DATA dataRx, DATA* buffer, uint8_t* map, uint8_t
         
         default:
         break;  
+    }
+
+    /*case where after hartbeat and routing built, there are still join request from
+    another nodes*/
+    if((SystemState >= state_START_HEART_BEAT) && (dataRx.msgType == msgType_BC_AUTODISCOVERY_START))
+    {
+        safeCopy = dataRx; /*make a safe copy of the data received in the ISR*/
+        process_post(&process_search_stack_buffer, PROCESS_EVENT_CONTINUE, &safeCopy);
+        return;
     }
 
     /*search if broadcast for duplicates*/

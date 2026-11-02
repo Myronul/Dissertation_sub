@@ -6,6 +6,7 @@
 #include "sys.h"
 #include "heart_beat.h"
 #include "util.h"
+#include "routing.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,7 +30,8 @@ static void Log_print_state()
 PROCESS(process_init_node, "Protocol Init Node");
 PROCESS(process_heartbeat, "Protocol Process HeartBeat");
 PROCESS(process_heartbeat_reset, "Protocol HeartBeat reset tick node");
-AUTOSTART_PROCESSES(&process_init_node, &process_heartbeat, &process_heartbeat_reset);
+PROCESS(process_search_stack_buffer, "Protocol Search Stack Buffer");
+AUTOSTART_PROCESSES(&process_init_node, &process_heartbeat, &process_heartbeat_reset, &process_search_stack_buffer);
 
 
 PROCESS_THREAD(process_init_node, ev, data)
@@ -58,8 +60,6 @@ PROCESS_THREAD(process_init_node, ev, data)
             {
                 /*invite from an existing network have been sent*/
                 /*TO DO*/
-                
-
             }
 
             if(message_search_for_type_BC(msgType_BC_AUTODISCOVERY_START) == 1)
@@ -119,7 +119,7 @@ PROCESS_THREAD(process_init_node, ev, data)
             Log_print_state();
             sys_start_heartbeat();
             sys_heart_beat_handler_tx_start();
-            PROCESS_YIELD();
+            PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_CONTINUE);
         }
 
         PROCESS_PAUSE();
@@ -151,7 +151,7 @@ PROCESS_THREAD(process_heartbeat, ev, data)
                 printf("[HEARTBEAT] Node has lost connectivity!\n");
                 clear_all_stack_buffers();
                 SystemState = state_AUTODISCOVERY;
-                continue;
+                process_post(&process_init_node, PROCESS_EVENT_CONTINUE, NULL);
             }
         }        
     }
@@ -159,8 +159,7 @@ PROCESS_THREAD(process_heartbeat, ev, data)
     PROCESS_END();
 }
 
-/*pentru heartbeat reset*/
-
+/*for heartbeat reset*/
 PROCESS_THREAD(process_heartbeat_reset, ev, data)
 {
     PROCESS_BEGIN();
@@ -172,10 +171,37 @@ PROCESS_THREAD(process_heartbeat_reset, ev, data)
         if(SystemState >= state_START_HEART_BEAT)
         {
             printf("[THREAD] Calling thread process_heartbeat_reset\n");
-            DATA copyData = *(DATA*)data; /*do not maintain reference to volatile variable!*/
+            DATA copyData = {0};
+            if(data != NULL)
+            {
+                copyData = *(DATA*)data; /*do not maintain reference to volatile variable!*/
+            }
             reset_heart_beat_tick_routing_table_node(copyData);
         }
 
+    }
+
+    PROCESS_END();
+}
+
+/*Process to search in the stack buffer for nodes that request a connection*/
+PROCESS_THREAD(process_search_stack_buffer, ev, data)
+{
+    PROCESS_BEGIN();
+
+    DATA myData = {0};
+
+    while(1)
+    {
+        PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_CONTINUE);
+        printf("[THREAD] Calling thread process_search_stack_buffer\n");
+
+        if(data != NULL)
+        {
+            myData = *(DATA*)data;
+        }
+        
+        add_node_to_routing_table(myData);
     }
 
     PROCESS_END();

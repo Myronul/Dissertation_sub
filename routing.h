@@ -2,6 +2,7 @@
 #define ROUTING_H
 
 #include "protocol_stack.h"
+#include "util.h"
 
 typedef struct ROUTING_TABLE
 {
@@ -20,5 +21,7 @@ void heapify_routing_table_processers(void);
 void heapify_routing_table_producers(void);
 void heapify_routing_table_consumers(void);
 void delete_node_from_table(nodeType flag, uint8_t index);
+void add_node_to_routing_table(DATA nodeData);
+bool search_node_in_routing_table(nodeType flag, uint8_t nodeId);
 
 #endif 

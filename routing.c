@@ -1,5 +1,6 @@
 #include "routing.h"
 #include "protocol_stack.h"
+#include "util.h"
 
 extern ROUTING_TABLE routingTable;
 extern uint8_t SystemState;
@@ -104,6 +105,92 @@ void delete_node_from_table(nodeType flag, uint8_t index)
         }
         routingTable.indexConsumers--;
         heapify_routing_table_consumers();
+        break;
+        
+        default:
+        break;
+    }
+}
+
+
+bool search_node_in_routing_table(nodeType flag, uint8_t nodeId)
+{
+    uint16_t i = 0;
+
+    switch(flag)
+    {
+        case PROCESSER:
+            for(i=0; i<routingTable.indexProcessers; i++)
+            {
+                if(routingTable.routingTableProcessers[i].id == nodeId)
+                {
+                    return true;
+                }
+            }
+        break;
+
+        case PRODUCER:
+            for(i=0; i<routingTable.indexProducers; i++)
+            {
+                if(routingTable.routingTableProducers[i].id == nodeId)
+                {
+                    return true;
+                }
+            }
+        break;
+
+        case CONSUMER:
+            for(i=0; i<routingTable.indexConsumers; i++)
+            {
+                if(routingTable.routingTableConsumers[i].id == nodeId)
+                {
+                    return true;
+                }
+            }
+        break;
+        
+        default:
+        break;
+    }
+
+    return false;
+}
+
+
+void add_node_to_routing_table(DATA nodeData)
+{
+    printf("[INFO]Adding node %u to routing table after heartbeat\n", nodeData.nodeInfo.id);
+
+    if(search_node_in_routing_table(nodeData.type, nodeData.nodeInfo.id))
+    {
+        printf("[INFO]Node %u already in routing table, skipping addition\n", nodeData.nodeInfo.id);
+        return; /*node already in the routing table, do not add it again*/
+    }
+
+    switch(nodeData.type)
+    {
+        case PROCESSER:
+            if(routingTable.indexProcessers < MAX_NDR_NODES)
+            {
+                routingTable.routingTableProcessers[routingTable.indexProcessers++] = nodeData.nodeInfo;
+                printf("[INFO]New Processer discovered with id %u\n", nodeData.nodeInfo.id);
+            }
+        break;
+
+        case PRODUCER:
+            if(routingTable.indexProducers < MAX_NDR_NODES)
+            {
+                routingTable.routingTableProducers[routingTable.indexProducers++] = nodeData.nodeInfo;
+                printf("[INFO]New Producer discovered with id %u\n", nodeData.nodeInfo.id);
+            }
+        break;
+
+        case CONSUMER:
+            if(routingTable.indexConsumers < MAX_NDR_NODES)
+            {
+                routingTable.routingTableConsumers[routingTable.indexConsumers++] = nodeData.nodeInfo;
+                printf("[INFO]New Consumer discovered with id %u\n", nodeData.nodeInfo.id);
+            }
         break;
         
         default:
